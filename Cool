@@ -1,0 +1,45 @@
+#include <iostream>
+#include <cstdlib>
+#include <thread>
+#include <chrono>
+#include <unistd.h>
+#include <linux/input-event-codes.h>
+
+#define MOVE_AMOUNT 10  // Pixels per step
+#define DELAY 50  // Milliseconds
+
+bool isKeyPressed(int keycode) {
+    std::string command = "grep -q ' " + std::to_string(keycode) + " ' /proc/bus/input/devices && echo 1 || echo 0";
+    return system(command.c_str()) == 1;
+}
+
+void moveMouse(int dx, int dy) {
+    std::string command = "ydotool mousemove -- " + std::to_string(dx) + " " + std::to_string(dy);
+    system(command.c_str());
+}
+
+void clickMouse(bool leftButton) {
+    int button = leftButton ? 0 : 1;
+    std::string command = "ydotool click " + std::to_string(button);
+    system(command.c_str());
+}
+
+int main() {
+    std::cout << "Wayland Mouse Control: Alt+WASD to move, Up Arrow = Left Click, Down Arrow = Right Click\n";
+
+    while (true) {
+        if (isKeyPressed(KEY_LEFTALT) || isKeyPressed(KEY_RIGHTALT)) {
+            if (isKeyPressed(KEY_W)) moveMouse(0, -MOVE_AMOUNT);
+            if (isKeyPressed(KEY_A)) moveMouse(-MOVE_AMOUNT, 0);
+            if (isKeyPressed(KEY_S)) moveMouse(0, MOVE_AMOUNT);
+            if (isKeyPressed(KEY_D)) moveMouse(MOVE_AMOUNT, 0);
+        }
+
+        if (isKeyPressed(KEY_UP)) clickMouse(true);  // Left Click
+        if (isKeyPressed(KEY_DOWN)) clickMouse(false);  // Right Click
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(DELAY));
+    }
+
+    return 0;
+}
