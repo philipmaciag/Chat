@@ -14,7 +14,7 @@ bool isKeyPressed(int keycode) {
 }
 
 void moveMouse(int dx, int dy) {
-    std::string command = "ydotool mousemove -- " + std::to_string(dx) + " " + std::to_string(dy);
+    std::string command = "ydotool mousemove  " + std::to_string(dx) + " " + std::to_string(dy);
     system(command.c_str());
 }
 
